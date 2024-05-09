@@ -1,6 +1,8 @@
 .ONESHELL:
 ENV_PREFIX=$(shell python -c "if __import__('pathlib').Path('.venv/bin/pip').exists(): print('.venv/bin/')")
 USING_POETRY=$(shell grep "tool.poetry" pyproject.toml && echo "yes")
+BUILD_DIR = tests/ src/ configs/
+
 
 .PHONY: help
 help:             ## Show the help.
@@ -37,11 +39,21 @@ lint:             ## Run pep8, black, mypy linters.
 	$(ENV_PREFIX)black -l 79 --check tests/
 	$(ENV_PREFIX)mypy --ignore-missing-imports python_project_playground/
 
-.PHONY: test
-test: lint        ## Run tests and generate coverage report.
+.PHONY: style
+style:
+	$(ENV_PREFIX)flake8 ${BUILD_DIR}
+	$(ENV_PREFIX)isort ${BUILD_DIR}
+	$(ENV_PREFIX)black -l 79 ${BUILD_DIR}
+	$(ENV_PREFIX)mypy --ignore-missing-imports ${BUILD_DIR}
+
+.PHONY: test_app
+test_app: lint        ## Run tests and generate coverage report.
 	$(ENV_PREFIX)pytest -v --cov-config .coveragerc --cov=python_project_playground -l --tb=short --maxfail=1 tests/
 	$(ENV_PREFIX)coverage xml
 	$(ENV_PREFIX)coverage html
+.PHONY: test
+test: style
+	$(ENV_PREFIX)pytest -v -s --durations=0 --durations-min=0
 
 .PHONY: watch
 watch:            ## Run tests on every change.
