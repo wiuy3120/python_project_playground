@@ -1,5 +1,5 @@
 # This requirements are for development and testing only, not for production.
-pytest
+pytest==7.1.3
 coverage
 flake8
 black
@@ -8,3 +8,4 @@ pytest-cov
 mypy
 gitchangelog
 mkdocs
+loguru
